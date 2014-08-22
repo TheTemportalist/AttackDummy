@@ -1,0 +1,16 @@
+[
+{
+  "modid": "attackdummy",
+  "name": "AttackDummy",
+  "description": "Provides a dummy entity for you to swing yo sword at!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["CountryGamer"],
+  "credits": "glasspelican, for the idea :D",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": ["cgo"]
+}
+]
