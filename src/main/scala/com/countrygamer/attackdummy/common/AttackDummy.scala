@@ -1,5 +1,6 @@
 package com.countrygamer.attackdummy.common
 
+import com.countrygamer.attackdummy.common.init.{ADEntity, ADItems}
 import com.countrygamer.cgo.wrapper.common.PluginWrapper
 import cpw.mods.fml.common.event.{FMLInitializationEvent, FMLPostInitializationEvent, FMLPreInitializationEvent}
 import cpw.mods.fml.common.{Mod, SidedProxy}
@@ -25,7 +26,8 @@ object AttackDummy extends PluginWrapper {
 
 	@Mod.EventHandler
 	def preInit(event: FMLPreInitializationEvent): Unit = {
-		super.preInitialize(this.pluginID, this.pluginName, event, this.proxy, ADOptions)
+		super.preInitialize(this.pluginID, this.pluginName, event, this.proxy, ADOptions, ADItems,
+			ADEntity)
 
 	}
 
