@@ -3,12 +3,13 @@ package com.countrygamer.attackdummy.common.entity
 import java.lang.Float
 
 import com.countrygamer.attackdummy.common.init.ADItems
-import com.countrygamer.cgo.common.lib.util.UtilDrops
+import com.countrygamer.cgo.common.lib.util.{Cursor, UtilDrops}
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Items
-import net.minecraft.item.ItemStack
+import net.minecraft.item.{ItemArmor, ItemStack}
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.MovingObjectPosition
 import net.minecraft.world.World
 
 /**
@@ -50,12 +51,30 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 	}
 
 	override def interactFirst(player: EntityPlayer): Boolean = {
-		if (player.getHeldItem != null && player.getHeldItem.getItem == Items.stick) {
-			this.setDead()
-			if (!player.capabilities.isCreativeMode)
-				UtilDrops.spawnItemStack(this.worldObj, this.posX + 0.5, this.posY + 1,
-					this.posZ + 0.5, new ItemStack(ADItems.attackDummy, 1, 0), this.rand, 20)
-			return true
+		if (player.getHeldItem != null) {
+			player.getHeldItem.getItem match {
+				case Items.stick =>
+					this.setDead()
+					if (!player.capabilities.isCreativeMode)
+						UtilDrops.spawnItemStack(this.worldObj, this.posX + 0.5, this.posY + 1,
+							this.posZ + 0.5, new ItemStack(ADItems.attackDummy, 1, 0), this.rand,
+							20)
+					return true
+				case armor: ItemArmor =>
+					val mop: MovingObjectPosition = Cursor
+							.getMOPFromPlayer(this.worldObj, player, 5.0D)
+					if (mop == null ||
+							mop.typeOfHit != MovingObjectPosition.MovingObjectType.ENTITY)
+						return false
+
+					val offsetX: Double = mop.hitVec.xCoord - this.posX
+					val offsetY: Double = mop.hitVec.yCoord - this.posY
+					val offsetZ: Double = mop.hitVec.zCoord - this.posZ
+
+				// TODO
+
+				case _ =>
+			}
 		}
 		false
 	}

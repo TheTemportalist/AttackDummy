@@ -12,7 +12,8 @@ import cpw.mods.fml.common.{Mod, SidedProxy}
  */
 @Mod(modid = AttackDummy.pluginID, name = AttackDummy.pluginName, version = "@PLUGIN_VERSION@",
 	guiFactory = "com.countrygamer.attackdummy.client.gui.configFactory.AttackDummyFactory",
-	modLanguage = "scala"
+	modLanguage = "scala",
+	dependencies = "required-after:Forge@[10.13,);required-after:cgo@[3,);"
 )
 object AttackDummy extends PluginWrapper {
 
