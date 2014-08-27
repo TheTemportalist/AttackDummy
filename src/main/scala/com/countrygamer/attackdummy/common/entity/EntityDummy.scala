@@ -3,13 +3,13 @@ package com.countrygamer.attackdummy.common.entity
 import com.countrygamer.attackdummy.common.AttackDummy
 import com.countrygamer.attackdummy.common.init.ADItems
 import com.countrygamer.cgo.common.lib.LogHelper
-import com.countrygamer.cgo.common.lib.util.UtilDrops
+import com.countrygamer.cgo.common.lib.util.{Cursor, UtilDrops}
+import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.{Entity, EntityLivingBase}
 import net.minecraft.init.Items
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.{MathHelper, MovingObjectPosition, Vec3}
+import net.minecraft.util.MovingObjectPosition
 import net.minecraft.world.World
 
 /**
@@ -63,7 +63,7 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 			else {
 				for (i <- 0 until 4) {
 					if (player.getHeldItem.getItem.isValidArmor(player.getHeldItem, i, this)) {
-						val mop: MovingObjectPosition = this.rayTrace(player, 5.0D)
+						val mop: MovingObjectPosition = Cursor.rayTrace(player, 5.0D)
 						if (mop == null) {
 							LogHelper.info(AttackDummy.pluginName, "error")
 							return false
@@ -109,47 +109,6 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 	override def readEntityFromNBT(tagCom: NBTTagCompound): Unit = {
 		this.setRotation(tagCom.getFloat("rotation"))
 
-	}
-
-	// Local until update
-	def rayTrace(player: EntityPlayer, reachDistance: Double): MovingObjectPosition = {
-		val partialTicks: Float = 1.0F
-		val checkLiquids: Boolean = true
-		val checkEntities: Boolean = true
-
-		val position: Vec3 = this.getPosition(player, partialTicks)
-		val cursor: Vec3 = this.getCursor(player, reachDistance, partialTicks)
-
-		player.worldObj.func_147447_a(position, cursor, checkLiquids, false, checkEntities)
-	}
-
-	def getPosition(entity: EntityLivingBase, partialTicks: Float): Vec3 = {
-		val x: Double = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks
-		val y: Double = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks
-		val z: Double = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks
-		Vec3.createVectorHelper(x, y, z)
-	}
-
-	def getCursor(entity: EntityLivingBase, reachDistance: Double, partialTicks: Float): Vec3 = {
-		val pitch: Float = entity.prevRotationPitch +
-				(entity.prevRotationPitch - entity.rotationPitch) * partialTicks
-		val yaw: Float = entity.prevRotationYaw +
-				(entity.prevRotationYaw - entity.rotationYaw * partialTicks)
-
-		val cosYaw: Float = MathHelper
-				.cos(-yaw * 0.017453292F - java.lang.Math.PI.asInstanceOf[Float])
-		val sinYaw: Float = MathHelper
-				.sin(-yaw * 0.017453292F - java.lang.Math.PI.asInstanceOf[Float])
-		val cosPitch: Float = -MathHelper.cos(-pitch * 0.017453292F)
-		val sinPitch: Float = MathHelper.sin(-pitch * 0.017453292F)
-		val cursor: Vec3 = Vec3.createVectorHelper(
-			(sinYaw * cosPitch).asInstanceOf[Double],
-			sinPitch.asInstanceOf[Double],
-			(cosYaw * cosPitch).asInstanceOf[Double]
-		)
-		this.getPosition(entity, partialTicks)
-				.addVector(cursor.xCoord * reachDistance, cursor.yCoord * reachDistance,
-		            cursor.zCoord * reachDistance)
 	}
 
 }
