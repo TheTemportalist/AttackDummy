@@ -1,6 +1,7 @@
 package com.countrygamer.attackdummy.common.entity
 
-import net.minecraft.util.{DamageSource, MathHelper}
+import net.minecraft.entity.{Entity, EntityCreature}
+import net.minecraft.util.DamageSource
 import net.minecraft.world.World
 
 /**
@@ -18,32 +19,11 @@ class EntityDefenseDummy(world: World, x: Double, y: Double, z: Double)
 
 	override def entityInit(): Unit = {
 		super.entityInit()
-		this.dataWatcher.addObject(17, java.lang.Float.valueOf(50)) // max health
-		this.dataWatcher.addObject(18, java.lang.Float.valueOf(50)) // current health
 
-	}
-
-	def setMaxHealth(health: Float): EntityDefenseDummy = {
-		this.dataWatcher.updateObject(17, java.lang.Float.valueOf(health))
-		this
-	}
-
-	def getMaxHealth(): Float = {
-		this.dataWatcher.getWatchableObjectFloat(17)
-	}
-
-	def setHealth(health: Float): EntityDefenseDummy = {
-		this.dataWatcher.updateObject(18,
-			java.lang.Float.valueOf(MathHelper.clamp_float(health, 0.0F, this.getMaxHealth())))
-		this
-	}
-
-	def getHealth(): Float = {
-		this.dataWatcher.getWatchableObjectFloat(18)
 	}
 
 	override def attackEntityFrom(source: DamageSource, damage: Float): Boolean = {
-		val newHealth: Float = this.getHealth() - damage
+		val newHealth: Float = this.getHealth() - this.applyArmorCalculations(source, damage)
 		if (newHealth <= 0.0F) {
 			this.setDead()
 		}
@@ -51,6 +31,23 @@ class EntityDefenseDummy(world: World, x: Double, y: Double, z: Double)
 			this.setHealth(newHealth)
 		}
 		true
+	}
+
+	override def onUpdate(): Unit = {
+		super.onUpdate()
+		val entities: java.util.List[_] = this.worldObj.getEntitiesWithinAABBExcludingEntity(this,
+			this.boundingBox.expand(6.0D, 6.0D, 6.0D), MobSelector)
+		for (i <- 0 until entities.size()) {
+			val entity: Entity = entities.get(i).asInstanceOf[Entity]
+			entity match {
+				case creature: EntityCreature =>
+					if (creature.getEntityToAttack != this) {
+						creature.setTarget(this)
+						return
+					}
+				case _ =>
+			}
+		}
 	}
 
 }

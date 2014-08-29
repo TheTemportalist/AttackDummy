@@ -1,13 +1,14 @@
 package com.countrygamer.attackdummy.common.entity
 
-import com.countrygamer.attackdummy.common.InventoryDummy
+import com.countrygamer.attackdummy.common.AttackDummy
 import com.countrygamer.attackdummy.common.init.ADItems
+import com.countrygamer.cgo.common.lib.LogHelper
 import com.countrygamer.cgo.common.lib.util.{Cursor, UtilDrops}
-import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.{Entity, EntityLiving}
 import net.minecraft.init.Items
 import net.minecraft.item.{ItemArmor, ItemStack}
-import net.minecraft.nbt.{NBTTagCompound, NBTTagList}
+import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util._
 import net.minecraft.world.World
 
@@ -16,9 +17,7 @@ import net.minecraft.world.World
  *
  * @author CountryGamer
  */
-class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(world) {
-
-	val inventory: InventoryDummy = new InventoryDummy(this, 4, 1)
+class EntityDummy(world: World, x: Double, y: Double, z: Double) extends EntityLiving(world) {
 
 	// Default Constructor
 	{
@@ -47,11 +46,20 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 		this.isInWater
 	}
 
+	/*
 	override def canBeCollidedWith: Boolean = {
 		true
 	}
+	*/
 
-	override def interactFirst(player: EntityPlayer): Boolean = {
+	override def allowLeashing(): Boolean = {
+		false
+	}
+
+	override def addVelocity(x: Double, y: Double, z: Double): Unit = {
+	}
+
+	override def interact(player: EntityPlayer): Boolean = {
 		if (player.getHeldItem != null && player.getHeldItem.getItem == Items.stick) {
 			this.setDead()
 			if (!player.capabilities.isCreativeMode)
@@ -62,17 +70,28 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 		}
 		else {
 			val armorType: Int = this.getArmorType(player)
-			if (armorType >= 0 && armorType < 4) {
-				if (player.getHeldItem != null &&
-						player.getHeldItem.getItem.isInstanceOf[ItemArmor]) {
-					this.inventory
-							.setInventorySlotContents(armorType, player.getHeldItem.copy())
+			if (!(armorType >= 0 && armorType < 4)) {
+				return false
+			}
 
-					val heldStack: ItemStack = player.getHeldItem
-					heldStack.stackSize = heldStack.stackSize - 1
-					if (heldStack.stackSize > 0) {
+			val slot: Int = 4 - (armorType + 1)
+			LogHelper.info(AttackDummy.pluginName, armorType + " : " + slot)
+
+			if (this.getEquipmentInSlot(slot) == null) {
+				if (player.getHeldItem != null &&
+						player.getHeldItem.getItem.isInstanceOf[ItemArmor] &&
+						player.getHeldItem.getItem
+								.isValidArmor(player.getHeldItem, armorType, this)) {
+					val armorStack: ItemStack = player.getHeldItem
+
+					// Set this armor
+					this.setCurrentItemOrArmor(slot, armorStack.copy())
+
+					// Remove item
+					armorStack.stackSize -= 1
+					if (armorStack.stackSize > 0) {
 						player.inventory.setInventorySlotContents(
-							player.inventory.currentItem, heldStack)
+							player.inventory.currentItem, armorStack)
 					}
 					else {
 						player.inventory.setInventorySlotContents(
@@ -81,19 +100,22 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 
 					return true
 				}
-				else if (player.getHeldItem == null) {
-					if (this.inventory.getStackInSlot(armorType) != null) {
-						val armorStack: ItemStack = this.inventory.getStackInSlot(armorType).copy()
+			}
+			else {
+				var armorStack: ItemStack = this.getEquipmentInSlot(slot)
+				if (armorStack != null) {
+					armorStack = armorStack.copy()
 
-						this.inventory.setInventorySlotContents(armorType, null)
+					// Remove the armor
+					this.setCurrentItemOrArmor(slot, null)
 
-						if (!player.inventory.addItemStackToInventory(armorStack)) {
-							UtilDrops.spawnItemStack(this.worldObj, player.posX, player.posY,
-								player.posZ, armorStack, this.rand, 40)
-						}
-
-						return true
+					// Give to player
+					if (!player.inventory.addItemStackToInventory(armorStack)) {
+						UtilDrops.spawnItemStack(this.worldObj, player.posX, player.posY,
+							player.posZ, armorStack, this.rand, 40)
 					}
+
+					return true
 				}
 			}
 		}
@@ -159,27 +181,48 @@ class EntityDummy(world: World, x: Double, y: Double, z: Double) extends Entity(
 	}
 
 	override def entityInit(): Unit = {
-		this.dataWatcher.addObject(6, java.lang.Float.valueOf(0.0f))
+		super.entityInit()
+		this.dataWatcher.addObject(18, java.lang.Float.valueOf(0.0f))
 	}
 
 	def getRotation(): Float = {
-		this.dataWatcher.getWatchableObjectFloat(6)
+		this.dataWatcher.getWatchableObjectFloat(18)
 	}
 
 	def setRotation(rot: Float): EntityDummy = {
-		this.dataWatcher.updateObject(6, java.lang.Float.valueOf(rot))
+		this.dataWatcher.updateObject(18, java.lang.Float.valueOf(rot))
 		this
 	}
 
 	override def writeEntityToNBT(tagCom: NBTTagCompound): Unit = {
+		super.writeEntityToNBT(tagCom)
 		tagCom.setFloat("rotation", this.getRotation())
-		tagCom.setTag("inventory", this.inventory.writeToNBT(new NBTTagList()))
 
 	}
 
 	override def readEntityFromNBT(tagCom: NBTTagCompound): Unit = {
+		super.readEntityFromNBT(tagCom)
 		this.setRotation(tagCom.getFloat("rotation"))
-		this.inventory.readFromNBT(tagCom.getTagList("inventory", 10))
+
+	}
+
+	override def damageArmor(amount: Float): Unit = {
+		var damage: Float = amount / 4.0F
+		if (damage < 1.0F) {
+			damage = 1.0F
+		}
+
+		for (i <- 0 until 4) {
+			var itemStack: ItemStack = this.getEquipmentInSlot(1 + i)
+			if (itemStack != null && itemStack.getItem.isInstanceOf[ItemArmor]) {
+				itemStack.damageItem(damage.asInstanceOf[Int], this)
+				if (itemStack.stackSize <= 0) {
+					itemStack = null
+				}
+				this.setCurrentItemOrArmor(1 + i, itemStack)
+				//this.inventory.setInventorySlotContents(i, itemStack)
+			}
+		}
 
 	}
 

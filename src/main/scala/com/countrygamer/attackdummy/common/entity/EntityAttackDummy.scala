@@ -26,12 +26,13 @@ class EntityAttackDummy(world: World, x: Double, y: Double, z: Double)
 
 		source.getDamageType match {
 			case "player" =>
-				this.checkAndReport(damage, source.getEntity)
+				this.checkAndReport(this.applyArmorCalculations(source, damage), source.getEntity)
 			case "arrow" | "thrown" | "indirectMagic" | "thorns" =>
-				this.checkAndReport(damage, source.getEntity)
+				this.checkAndReport(this.applyArmorCalculations(source, damage), source.getEntity)
 			case "onFire" | "fireball" =>
 				if (source.isProjectile)
-					this.checkAndReport(damage, source.getEntity)
+					this.checkAndReport(this.applyArmorCalculations(source, damage),
+						source.getEntity)
 			case _ =>
 		}
 
@@ -51,22 +52,5 @@ class EntityAttackDummy(world: World, x: Double, y: Double, z: Double)
 			Player.sendMessageToPlayer(player,
 				"You did " + damage + " hit points of damage.")
 	}
-
-	/*
-	def applyArmorDeductions(source: DamageSource, damage: Float): Float = {
-		var newDamage: Float = damage
-		if (!source.isUnblockable) {
-			val i: Int = 25 - this.getTotalArmorValue()
-			val f1: Float = damage * i.asInstanceOf[Float]
-			this.damageArmor(damage)
-			newDamage = f1 / 25.0F
-		}
-		newDamage
-	}
-
-	def getTotalArmorValue(): Int = {
-
-	}
-	*/
 
 }
