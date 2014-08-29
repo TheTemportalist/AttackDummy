@@ -30,6 +30,8 @@ object AttackDummy extends PluginWrapper {
 		super.preInitialize(this.pluginID, this.pluginName, event, this.proxy, ADOptions, ADItems,
 			ADEntity)
 
+		//RegisterHelper.registerPacketHandler(this.pluginID, classOf[PacketSwapArmor])
+
 	}
 
 	@Mod.EventHandler
