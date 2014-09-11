@@ -18,8 +18,9 @@ buildscript {
 
 repositories {
     maven {
-        url = "http://maven.dries007.net/content/repositories/ccm/"
-    }
+         name "DDD repo"
+         url "http://doubledoordev.net/maven/"
+     }
 }
 
 // this is scala source
