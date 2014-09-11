@@ -16,6 +16,12 @@ buildscript {
     }
 }
 
+repositories {
+    maven {
+        url = "http://maven.dries007.net/content/repositories/ccm/"
+    }
+}
+
 // this is scala source
 apply plugin: 'scala'
 apply plugin: 'forge'
@@ -41,6 +47,11 @@ projectPropFile.withReader {
 // Store the data for this project
 group = "${projectConfig.prefix}.${projectConfig.modid}"
 archivesBaseName = "${projectConfig.modName}"
+
+dependencies {
+    compile("com.countrygamer.cgo:CGOrigin:${config.minecraft_version}-3+:dev")
+}
+
 version = "${projectConfig.version}"
 
 minecraft {
