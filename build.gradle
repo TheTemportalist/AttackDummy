@@ -50,7 +50,7 @@ group = "${projectConfig.prefix}.${projectConfig.modid}"
 archivesBaseName = "${projectConfig.modName}"
 
 dependencies {
-    compile "com.countrygamer.cgo:CGOrigin:${config.minecraft_version}-+:dev"
+    compile "com.countrygamer.cgo:CGOrigin:1.7.10-3.0.8+:dev"
 }
 
 version = "${projectConfig.version}"
