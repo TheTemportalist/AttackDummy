@@ -18,9 +18,9 @@ buildscript {
 
 repositories {
     maven {
-         name "DDD repo"
-         url "http://doubledoordev.net/maven/"
-     }
+        name "DDD repo"
+        url "http://doubledoordev.net/maven/"
+    }
 }
 
 // this is scala source
@@ -50,7 +50,7 @@ group = "${projectConfig.prefix}.${projectConfig.modid}"
 archivesBaseName = "${projectConfig.modName}"
 
 dependencies {
-    compile("com.countrygamer.cgo:CGOrigin:${config.minecraft_version}-3+:dev")
+    compile "com.countrygamer.cgo:CGOrigin:${config.minecraft_version}-3+:dev"
 }
 
 version = "${projectConfig.version}"
