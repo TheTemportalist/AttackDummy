@@ -16,13 +16,6 @@ buildscript {
     }
 }
 
-repositories {
-    maven {
-        name "DDD repo"
-        url "http://doubledoordev.net/maven/"
-    }
-}
-
 // this is scala source
 apply plugin: 'scala'
 apply plugin: 'forge'
@@ -49,10 +42,6 @@ projectPropFile.withReader {
 group = "${projectConfig.prefix}.${projectConfig.modid}"
 archivesBaseName = "${projectConfig.modName}"
 
-dependencies {
-    compile "com.countrygamer.cgo:CGOrigin:1.7.10-3.0.8_build-69:dev"
-}
-
 version = "${projectConfig.version}"
 
 minecraft {
@@ -72,6 +61,17 @@ minecraft {
 
 // This is used to set the local version
 version = "${config.minecraft_version}-$version"
+
+repositories {
+    maven {
+        name "DDD repo"
+        url "http://doubledoordev.net/maven/"
+    }
+}
+
+dependencies {
+    compile "com.countrygamer.cgo:CGOrigin:1.7.10-3.0.8_build-69:dev"
+}
 
 // Used for processing, dont meddle
 processResources {
