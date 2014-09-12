@@ -70,8 +70,15 @@ repositories {
 }
 
 dependencies {
-    compile "com.countrygamer.cgo:CGOrigin:1.7.10-3.0.8_build-69:dev"
+     compile("com.countrygamer.cgo:CGOrigin:${config.minecraft_version}-3+:dev")
 }
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// If on the jenkins system, append the build number to the jar name
+if (System.getenv().BUILD_NUMBER != null) {
+    version = version + "_build-" + System.getenv().BUILD_NUMBER
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Used for processing, dont meddle
 processResources {
@@ -106,11 +113,6 @@ gitFile.withReader {
 configurations {
     compile
     deployJars
-}
-
-// If on the jenkins system, append the build number to the jar name
-if (System.getenv().BUILD_NUMBER != null) {
-    version = version + "_build-" + System.getenv().BUILD_NUMBER
 }
 
 // The next 3 tasks are little tasks for compiling different versions of the code
